@@ -1,16 +1,19 @@
 ---
 title: "White Wine Quality Analysis"
 author: "Hani Elmalky"
-date: January 15, 2019
-output: 
-  html_document: 
-    toc: true
-    toc_float:
-      collapsed: false
-      smooth_scroll: false
-    toc_depth: 2 
+date: "January 15, 2019"
+output:
+  html_document:
     number_sections: yes
     theme: spacelab
+    toc: yes
+    toc_depth: 2
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
 ---
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
@@ -26,6 +29,8 @@ output:
 #install.packages("RColorBrewer")
 #install.packages("memisc")
 #install.packages("cowplot")
+#install.packages("latex2exp")
+
 
 
 
@@ -41,6 +46,8 @@ library(ggpubr)
 library(RColorBrewer)
 library(memisc)
 library(cowplot)
+library(latex2exp)
+
 
 
 ```
@@ -106,10 +113,14 @@ plots <- list()
 for (item in names(ww)) {
   plots[[item]] <- ggplot(data = ww, aes_string(x = item)) + 
     geom_density(fill = 'lightgray') + 
-    geom_vline(aes(xintercept = mean(!!ensym(item))), linetype = "solid", color = 'blue', size = 0.6) + 
-    geom_vline(aes(xintercept = median(!!ensym(item))), linetype = "solid", color = 'red', size = 0.6) + 
-    geom_vline(aes(xintercept = quantile(!!ensym(item), probs = 0.25)), linetype = "dashed") +
-    geom_vline(aes(xintercept = quantile(!!ensym(item), probs = 0.75)), linetype = "dashed") +
+    geom_vline(aes(xintercept = mean(!!ensym(item))), 
+               linetype = "solid", color = 'blue', size = 0.6) + 
+    geom_vline(aes(xintercept = median(!!ensym(item))), 
+               linetype = "solid", color = 'red', size = 0.6) + 
+    geom_vline(aes(xintercept = quantile(!!ensym(item), probs = 0.25)), 
+               linetype = "dashed") +
+    geom_vline(aes(xintercept = quantile(!!ensym(item), probs = 0.75)), 
+               linetype = "dashed") +
     labs( y="")
 }
 
@@ -142,15 +153,19 @@ for (item in names(ww)) {
   }
   plots[[index]] <- ggplot(data = ww, aes_string(x = item)) + 
     geom_density(fill = 'lightgray') + 
-    geom_vline(aes(xintercept = mean(!!ensym(item))), linetype = "solid", color = 'blue', size = 0.6) + 
-    geom_vline(aes(xintercept = median(!!ensym(item))), linetype = "solid", color = 'red', size = 0.6) + 
-    geom_vline(aes(xintercept = quantile(!!ensym(item), probs = 0.25)), linetype = "dashed") +
-    geom_vline(aes(xintercept = quantile(!!ensym(item), probs = 0.75)), linetype = "dashed") +
+    geom_vline(aes(xintercept = mean(!!ensym(item))), 
+               linetype = "solid", color = 'blue', size = 0.6) + 
+    geom_vline(aes(xintercept = median(!!ensym(item))), 
+               linetype = "solid", color = 'red', size = 0.6) + 
+    geom_vline(aes(xintercept = quantile(!!ensym(item), probs = 0.25)), 
+               linetype = "dashed") +
+    geom_vline(aes(xintercept = quantile(!!ensym(item), probs = 0.75)), 
+               linetype = "dashed") +
     labs( y="")
   
   
-  plots[[index + 3]] <- ggplot(data = ww) + 
-    geom_boxplot(aes_string(y = item)) +
+  plots[[index + 3]] <- ggplot(data = ww, aes_string(y = item)) + 
+    geom_boxplot() +
     theme(legend.position="none") +
     scale_fill_brewer(palette="Set1") +
     coord_flip()
@@ -313,12 +328,12 @@ The following table highlights correlation values between Quality & other variab
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # create the correlation frame
-corr_df <- subset(ww, select = -c(quality.grp)) %>%     # subset and remove categorial variable
-  cor(., y = .$quality)  %>%                            # build correlation matrix
-  round(., 3) %>%                                       # round all numbers to 2
-  .[!rownames(.) %in% 'quality',] %>%                   # remove quality row from list
-  as.data.frame(.) %>%                                  # build the list into a dataframe
-  cbind(names = rownames(.), .)                         # copy row names into its column and extract
+corr_df <- subset(ww, select = -c(quality.grp)) %>%     # subset
+  cor(., y = .$quality)  %>%                            # correlation matrix
+  round(., 3) %>%                                       # round all numbers
+  .[!rownames(.) %in% 'quality',] %>%                   # remove quality row 
+  as.data.frame(.) %>%                                  # list ->  dataframe
+  cbind(names = rownames(.), .)                         # copy and extract
 
 # clean row names & column names
 rownames(corr_df) <- NULL
@@ -396,7 +411,8 @@ ggpairs(ww_sample, axisLabels = 'show',
   theme(legend.position = "bottom", 
         panel.grid.major = element_blank(), 
         axis.ticks = element_blank(), 
-        panel.border = element_rect(linetype = "solid", colour = "black", fill = NA))
+        panel.border = element_rect(linetype = "solid", 
+                                    colour = "black", fill = NA))
 # combo = wrap("dot", outlier.shape = I('.'))
 ```
 
@@ -441,20 +457,11 @@ for (item in items) {
     theme(legend.position="none") +
     scale_fill_brewer(palette="Set1") + 
     labs(fill = "Wine Grade") + 
-    geom_smooth(method = "lm", se = TRUE, color = "orange", aes_string(y = item, group = 1))
+    geom_smooth(method = "lm", se = TRUE, color = "orange", 
+                aes_string(y = item, group = 1))
 }
 
 grid.arrange(grobs = plots, ncol = 3)
-
-#trial-code to add corr factor as text on the graph
-  #corr_lable <- paste(c("r=", subset(corr_df2, (corr_df2[,1] %in% item))[,2]), collapse = " ")
-  #print(corr_lable)
-
-  #    +
-  #geom_text(aes(x = 9, y = max(!!ensym(item)), 
-  #               label = paste(c("r=", subset(corr_df2, (corr_df2[,1] %in% item))[,2]), collapse = " ")), 
-  #          colour = 'black')
-
 ```
 
 It is clear from the above box diagram that great quality wines have a strong positive correlation with alcohol density. The linear model plotted in orange shows a strong linear growth of wine quality with alcohol increase in wine.
@@ -483,9 +490,11 @@ p3 <- ggdensity(ww,
 p4 <- ggdensity(ww, 
           x = "volatile.acidity", color = "quality.grp", fill="quality.grp", 
           add = "mean", rug = FALSE,  palette = "Set1") %>%
-  ggpar(., xlim = c(min(ww$volatile.acidity), quantile(ww$volatile.acidity, probs = 0.95)))
+  ggpar(., xlim = c(min(ww$volatile.acidity), 
+                    quantile(ww$volatile.acidity, probs = 0.95)))
 
-ggarrange(p1, p2, p3, p4, ncol=2, nrow = 2, common.legend = TRUE, legend="bottom", labels = "AUTO")
+ggarrange(p1, p2, p3, p4, ncol=2, nrow = 2, 
+          common.legend = TRUE, legend="bottom", labels = "AUTO")
 
 ```
   
@@ -510,7 +519,8 @@ for (item in items) {
   plots[[item]] <- ggplot(data = ww, aes(x = alcohol)) + 
     geom_point(alpha = 1/5,aes_string(y = item, colour = item)) +
     scale_colour_gradientn(colours=rainbow(4))+
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1))
+    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", 
+                aes_string(y = item, group = 1))
 }
 
 grid.arrange(grobs = plots, ncol = 2)
@@ -530,11 +540,14 @@ plots <- list()
 ww_subset <- subset(ww, ww[[x_item]] <= quantile(ww[[x_item]], 0.95))
 
 for (item in items) {
-  plots[[item]] <- ggplot(data = subset(ww_subset, ww_subset[[item]] <= quantile(ww_subset[[item]], 0.95)), 
-                          aes_string(x = x_item)) + 
+  plots[[item]] <- ggplot(
+    data = subset(ww_subset, 
+                  ww_subset[[item]] <= quantile(ww_subset[[item]], 0.95)), 
+    aes_string(x = x_item)) + 
     geom_point(alpha = 1/5,aes_string(y = item, colour = item)) +
     scale_colour_gradientn(colours=rainbow(4))+
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1)) +
+    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", 
+                aes_string(y = item, group = 1)) +
     theme(legend.position="bottom")
 }
 
@@ -559,11 +572,14 @@ plots <- list()
 ww_subset <- subset(ww, ww[[x_item]] <= quantile(ww[[x_item]], 0.95))
 
 for (item in items) {
-  plots[[item]] <- ggplot(data = subset(ww_subset, ww_subset[[item]] <= quantile(ww_subset[[item]], 0.95)), 
-                          aes_string(x = x_item)) + 
+  plots[[item]] <- ggplot(
+    data = subset(ww_subset, 
+                  ww_subset[[item]] <= quantile(ww_subset[[item]], 0.95)), 
+    aes_string(x = x_item)) + 
     geom_point(alpha = 1/5,aes_string(y = item, colour = item)) +
     scale_colour_gradientn(colours=rainbow(4))+
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1))
+    geom_smooth(method = "lm", se = TRUE, color = "orange", 
+                fill="blue", aes_string(y = item, group = 1))
 }
 
 grid.arrange(grobs = plots, ncol = 1)
@@ -595,6 +611,13 @@ We have also noticed the following strong correlations in the dataset
 
 > Dataset used in the following plot has been modified to remove outliers above the 95 percentile of the **Density** attributes.
 
+We will create a new column in the dataset `quality.factor` as a categorical variable from `quality` to use in the multivariant analysis.
+```{r echo=FALSE, fig.height=8, fig.width=12, message=FALSE, warning=FALSE}
+ww$quality.factor <- as.factor(ww$quality)
+
+summary(ww$quality.factor)
+```
+
 
 #### Quality interdependency on Alcohol vs. Density
 
@@ -605,34 +628,44 @@ Based on the findings in the bivariant analysis, in this section we will try to 
 items <- c("alcohol")
 x_item <- c("density")
 color_item1 <- ("quality.grp")
-color_item2 <- ("quality")
+color_item2 <- ("quality.factor")
 plots <- list()
 index <- 1
 
 ww_subset <- subset(ww, ww$density <= quantile(ww$density, 0.95))
 
 for (item in items) {
-  plots[[index]] <- ggplot(data = ww_subset, aes_string(x = x_item)) + 
-    geom_point(alpha = 1, size = 1,aes_string(y = item, colour = color_item1)) +
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1)) +
-    scale_fill_brewer(palette="Set1") + 
-    geom_vline(aes(xintercept = mean(!!ensym(x_item))), linetype = "dashed", color = 'darkgray', size = 0.6) +
-    geom_hline(aes(yintercept = mean(!!ensym(item))), linetype = "dashed", color = 'darkgray', size = 0.6)
+  plots[[index]] <- ggplot(data = ww_subset, 
+                           aes_string(x = x_item, colour = color_item1)) + 
+    geom_point(alpha = 1, size = 1,
+               aes_string(y = item)) +
+    geom_smooth(method = "lm", se = FALSE, 
+                aes_string(y = item)) +
+    scale_color_brewer(type="seq") + 
+    geom_vline(aes(xintercept = mean(!!ensym(x_item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6) +
+    geom_hline(aes(yintercept = mean(!!ensym(item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6)
 
 
   
-  plots[[index + 1]] <- ggplot(data = ww_subset, aes_string(x = x_item)) + 
-    geom_point(alpha = 1, size = 1,aes_string(y = item, colour = color_item2)) +
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1)) +
-    scale_colour_gradientn(colours=rainbow(4)) +
-    geom_vline(aes(xintercept = mean(!!ensym(x_item))), linetype = "dashed", color = 'darkgray', size = 0.6) +
-    geom_hline(aes(yintercept = mean(!!ensym(item))), linetype = "dashed", color = 'darkgray', size = 0.6)
+  plots[[index + 1]] <- ggplot(data = ww_subset, 
+                               aes_string(x = x_item, colour = color_item2)) + 
+    geom_point(alpha = 1, size = 1,
+               aes_string(y = item)) +
+    geom_smooth(method = "lm", se = FALSE, aes_string(y = item)) +
+    scale_color_brewer(type="seq") + 
+    geom_vline(aes(xintercept = mean(!!ensym(x_item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6) +
+    geom_hline(aes(yintercept = mean(!!ensym(item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6)
     # scale_colour_gradient2(low = "white", mid = "green" , high = "red")
 
   index <- index + 2
 }
 
-grid.arrange(grobs = plots, ncol = 2, bottom = "dashed lines represent the mean of its corresponding axis")
+grid.arrange(grobs = plots, ncol = 2, 
+             bottom = "dashed lines represent the mean of its corresponding axis")
 
 ```
 
@@ -643,13 +676,15 @@ Let's isolate the great-quality wine in its own graph to see if this statement s
 
 ```{r echo=FALSE, fig.height=8, fig.width=12}
 
-ggplot(data = ww_subset, aes(x = density)) + 
-  geom_point(alpha = 1,aes(y = alcohol, colour = quality)) +
-  geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes(y = alcohol, group = 1)) +
+ggplot(data = ww_subset, aes(x = density, colour = quality.factor)) + 
+  geom_point(alpha = 1,aes(y = alcohol)) +
+  geom_smooth(method = "lm", se = FALSE,  aes(y = alcohol)) +
   facet_wrap(~quality.grp, ncol = 3) + 
-  scale_colour_gradientn(colours=rainbow(4)) + 
-  geom_vline(aes(xintercept = mean(!!ensym(x_item))), linetype = "dashed", color = 'darkgray', size = 0.6) +
-  geom_hline(aes(yintercept = mean(!!ensym(item))), linetype = "dashed", color = 'darkgray', size = 0.6)
+  scale_color_brewer(type="seq") + 
+  geom_vline(aes(xintercept = mean(!!ensym(x_item))), 
+             linetype = "dashed", color = 'darkgray', size = 0.6) +
+  geom_hline(aes(yintercept = mean(!!ensym(item))), 
+             linetype = "dashed", color = 'darkgray', size = 0.6)
 
 
 ```
@@ -667,21 +702,27 @@ Hence, we will start analyzing those Quality vs. second order variables.
 items <- c("residual.sugar", "chlorides", "volatile.acidity")
 x_item <- c("alcohol")
 color_item1 <- ("quality.grp")
-color_item2 <- ("quality")
+color_item2 <- ("quality.factor")
 plots <- list()
 index <- 1
 
 
 for (item in items) {
-  plots[[index]] <- ggplot(data = ww_subset, aes_string(x = x_item)) + 
-    geom_point(alpha = 1, size = 1,aes_string(y = item, colour = color_item1)) +
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1)) +
-    scale_fill_brewer(palette="Set1")
+  plots[[index]] <- ggplot(data = ww_subset, 
+                           aes_string(x = x_item, colour = color_item1)) + 
+    geom_point(alpha = 1, size = 1,
+               aes_string(y = item)) +
+    geom_smooth(method = "lm", se = FALSE, 
+                aes_string(y = item)) +
+    scale_color_brewer(type="seq")
   
-  plots[[index + 1]] <- ggplot(data = ww_subset, aes_string(x = x_item)) + 
-    geom_point(alpha = 1, size = 1,aes_string(y = item, colour = color_item2)) +
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1)) +
-    scale_colour_gradientn(colours=rainbow(4))
+  plots[[index + 1]] <- ggplot(data = ww_subset, 
+                               aes_string(x = x_item, colour = color_item2)) + 
+    geom_point(alpha = 1, size = 1,
+               aes_string(y = item)) +
+    geom_smooth(method = "lm", se = FALSE, 
+                aes_string(y = item)) +
+  scale_color_brewer(type="seq")
     # scale_colour_gradient2(low = "white", mid = "green" , high = "red")
 
   index <- index + 2
@@ -702,34 +743,49 @@ We can increase the plot contrast via dropping the middle grade (Good Wine) wine
 items <- c("residual.sugar", "chlorides", "volatile.acidity")
 x_item <- c("alcohol")
 color_item1 <- ("quality.grp")
-color_item2 <- ("quality")
+color_item2 <- ("quality.factor")
 plot_three <- list()
 index <- 1
 
 ww_subset_bad_great <- subset(ww, ww$quality.grp == c("Bad", "Great"))
 
 for (item in items) {
-  plot_three[[index]] <- ggplot(data = ww_subset_bad_great, aes_string(x = x_item)) + 
-    geom_point(alpha = 1, size = 1,aes_string(y = item, colour = color_item1)) +
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1)) +
-    scale_fill_brewer(palette="Set1") + 
-    geom_vline(aes(xintercept = mean(!!ensym(x_item))), linetype = "dashed", color = 'darkgray', size = 0.6) +
-    geom_hline(aes(yintercept = mean(!!ensym(item))), linetype = "dashed", color = 'darkgray', size = 0.6)
+  plot_three[[index]] <- ggplot(data = ww_subset_bad_great, 
+                           aes_string(x = x_item, colour = color_item1)) + 
+    geom_point(alpha = 1, size = 1,
+               aes_string(y = item)) +
+    geom_smooth(method = "lm", se = FALSE, 
+                aes_string(y = item)) +
+    scale_color_brewer(type="seq") +
+    labs(y = TeX(paste(item,'($g/dm^3$)'))) +
+    geom_vline(aes(xintercept = mean(!!ensym(x_item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6) +
+    geom_hline(aes(yintercept = mean(!!ensym(item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6)
 
 
   
-  plot_three[[index + 1]] <- ggplot(data = ww_subset_bad_great, aes_string(x = x_item)) + 
-    geom_point(alpha = 1, size = 1,aes_string(y = item, colour = color_item2)) +
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1)) +
-    scale_colour_gradientn(colours=rainbow(4)) +
-    geom_vline(aes(xintercept = mean(!!ensym(x_item))), linetype = "dashed", color = 'darkgray', size = 0.6) +
-    geom_hline(aes(yintercept = mean(!!ensym(item))), linetype = "dashed", color = 'darkgray', size = 0.6)
+  plot_three[[index + 1]] <- ggplot(data = ww_subset_bad_great, 
+                           aes_string(x = x_item, colour = color_item2)) + 
+    geom_point(alpha = 1, size = 1,
+               aes_string(y = item)) +
+    geom_smooth(method = "lm", se = FALSE, 
+                aes_string(y = item)) +
+    scale_color_brewer(type="seq")+
+    labs(y = TeX(paste(item,'($g/dm^3$)')), x = 'Alcohol %') +
+    geom_vline(aes(xintercept = mean(!!ensym(x_item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6) +
+    geom_hline(aes(yintercept = mean(!!ensym(item))), 
+               linetype = "dashed", 
+               color = 'darkgray', 
+               size = 0.6)
     # scale_colour_gradient2(low = "white", mid = "green" , high = "red")
 
   index <- index + 2
 }
 
-grid.arrange(grobs = plot_three, ncol = 2, bottom = "dashed lines represent the mean of its corresponding axis")
+grid.arrange(grobs = plot_three, ncol = 2,
+             bottom = "dashed lines represent the mean of its corresponding axis")
 ```
 
 It is clear from the above plot that, 
@@ -747,21 +803,27 @@ It is clear from the above plot that,
 items <- c("residual.sugar", "total.sulfur.dioxide", "volatile.acidity")
 x_item <- c("density")
 color_item1 <- ("quality.grp")
-color_item2 <- ("quality")
+color_item2 <- ("quality.factor")
 plots <- list()
 index <- 1
 
 
 for (item in items) {
-  plots[[index]] <- ggplot(data = ww_subset, aes_string(x = x_item)) + 
-    geom_point(alpha = 1, size = 1,aes_string(y = item, colour = color_item1)) +
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1)) +
-    scale_fill_brewer(palette="Set1")
+  plots[[index]] <- ggplot(data = ww_subset, 
+                           aes_string(x = x_item, colour = color_item1)) + 
+    geom_point(alpha = 1, size = 1,
+               aes_string(y = item)) +
+    geom_smooth(method = "lm", se = FALSE, 
+                aes_string(y = item)) +
+    scale_color_brewer(type="seq")
   
-  plots[[index + 1]] <- ggplot(data = ww_subset, aes_string(x = x_item)) + 
-    geom_point(alpha = 1, size = 1,aes_string(y = item, colour = color_item2)) +
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1)) +
-    scale_colour_gradientn(colours=rainbow(4))
+  plots[[index + 1]] <- ggplot(data = ww_subset, 
+                               aes_string(x = x_item, colour = color_item2)) + 
+    geom_point(alpha = 1, size = 1,
+               aes_string(y = item)) +
+    geom_smooth(method = "lm", se = FALSE, 
+                aes_string(y = item)) +
+  scale_color_brewer(type="seq")
     # scale_colour_gradient2(low = "white", mid = "green" , high = "red")
 
   index <- index + 2
@@ -778,32 +840,47 @@ It is hard to draw conclusions from the above plot, let's try to drop the middle
 items <- c("residual.sugar", "total.sulfur.dioxide", "volatile.acidity")
 x_item <- c("density")
 color_item1 <- ("quality.grp")
-color_item2 <- ("quality")
+color_item2 <- ("quality.factor")
 plots <- list()
 index <- 1
 
 ww_subset_bad_great <- subset(ww, ww$quality.grp == c("Bad", "Great"))
 
 for (item in items) {
-  plots[[index]] <- ggplot(data = ww_subset_bad_great, aes_string(x = x_item)) + 
-    geom_point(alpha = 1, size = 1,aes_string(y = item, colour = color_item1)) +
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1)) +
-    scale_fill_brewer(palette="Set1") + 
-    geom_vline(aes(xintercept = mean(!!ensym(x_item))), linetype = "dashed", color = 'darkgray', size = 0.6) +
-    geom_hline(aes(yintercept = mean(!!ensym(item))), linetype = "dashed", color = 'darkgray', size = 0.6)
+  plots[[index]] <- ggplot(data = ww_subset_bad_great, 
+                           aes_string(x = x_item, colour = color_item1)) + 
+    geom_point(alpha = 1, size = 1,
+               aes_string(y = item)) +
+    geom_smooth(method = "lm", se = FALSE, 
+                aes_string(y = item)) +
+    scale_color_brewer(type="seq") +
+    geom_vline(aes(xintercept = mean(!!ensym(x_item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6) +
+    geom_hline(aes(yintercept = mean(!!ensym(item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6)
+
+
   
-  plots[[index + 1]] <- ggplot(data = ww_subset_bad_great, aes_string(x = x_item)) + 
-    geom_point(alpha = 1, size = 1,aes_string(y = item, colour = color_item2)) +
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1)) +
-    scale_colour_gradientn(colours=rainbow(4)) +
-    geom_vline(aes(xintercept = mean(!!ensym(x_item))), linetype = "dashed", color = 'darkgray', size = 0.6) +
-    geom_hline(aes(yintercept = mean(!!ensym(item))), linetype = "dashed", color = 'darkgray', size = 0.6)
+  plots[[index + 1]] <- ggplot(data = ww_subset_bad_great, 
+                           aes_string(x = x_item, colour = color_item2)) + 
+    geom_point(alpha = 1, size = 1,
+               aes_string(y = item)) +
+    geom_smooth(method = "lm", se = FALSE, 
+                aes_string(y = item)) +
+    scale_color_brewer(type="seq")+
+    geom_vline(aes(xintercept = mean(!!ensym(x_item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6) +
+    geom_hline(aes(yintercept = mean(!!ensym(item))), 
+               linetype = "dashed", 
+               color = 'darkgray', 
+               size = 0.6)
     # scale_colour_gradient2(low = "white", mid = "green" , high = "red")
 
   index <- index + 2
 }
 
-grid.arrange(grobs = plots, ncol = 2, bottom = "dashed lines represent the mean of its corresponding axis")
+grid.arrange(grobs = plots, ncol = 2, 
+             bottom = "dashed lines represent the mean of its corresponding axis")
 
 ```
 
@@ -825,34 +902,47 @@ We can infer from the above plot that,
 items <- c("total.sulfur.dioxide")
 x_item <- c("residual.sugar")
 color_item1 <- ("quality.grp")
-color_item2 <- ("quality")
+color_item2 <- ("quality.factor")
 plots <- list()
 index <- 1
 
 ww_subset2 <- subset(ww, 
-                     ww$total.sulfur.dioxide <= quantile(ww$total.sulfur.dioxide, 0.95) & 
+                     ww$total.sulfur.dioxide <= 
+                       quantile(ww$total.sulfur.dioxide, 0.95) & 
                        ww$residual.sugar <= quantile(ww$residual.sugar, 0.95) & 
                        ww$quality.grp == c("Bad" ,"Great"))
 
 for (item in items) {
-  plots[[index]] <- ggplot(data = ww_subset2, aes_string(x = x_item)) + 
-    geom_point(alpha = 1, size = 1,aes_string(y = item, colour = color_item1)) +
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1)) +
-    scale_fill_brewer(palette="Set1") + geom_vline(aes(xintercept = mean(!!ensym(x_item))), linetype = "dashed", color = 'darkgray', size = 0.6) +
-    geom_hline(aes(yintercept = mean(!!ensym(item))), linetype = "dashed", color = 'darkgray', size = 0.6)
+  plots[[index]] <- ggplot(data = ww_subset2, 
+                           aes_string(x = x_item, colour = color_item1)) + 
+    geom_point(alpha = 1, size = 1,
+               aes_string(y = item)) +
+    geom_smooth(method = "lm", se = FALSE, 
+                aes_string(y = item)) +
+    scale_color_brewer(type="seq")+
+    geom_vline(aes(xintercept = mean(!!ensym(x_item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6) +
+    geom_hline(aes(yintercept = mean(!!ensym(item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6)
   
-  plots[[index + 1]] <- ggplot(data = ww_subset2, aes_string(x = x_item)) + 
-    geom_point(alpha = 1, size = 1,aes_string(y = item, colour = color_item2)) +
-    geom_smooth(method = "lm", se = TRUE, color = "orange", fill="blue", aes_string(y = item, group = 1)) +
-    scale_colour_gradientn(colours=rainbow(4)) + 
-    geom_vline(aes(xintercept = mean(!!ensym(x_item))), linetype = "dashed", color = 'darkgray', size = 0.6) +
-    geom_hline(aes(yintercept = mean(!!ensym(item))), linetype = "dashed", color = 'darkgray', size = 0.6)
+  plots[[index + 1]] <- ggplot(data = ww_subset2, 
+                               aes_string(x = x_item, colour = color_item2)) + 
+    geom_point(alpha = 1, size = 1,
+               aes_string(y = item)) +
+    geom_smooth(method = "lm", se = FALSE, 
+                aes_string(y = item)) +
+    scale_color_brewer(type="seq")+
+    geom_vline(aes(xintercept = mean(!!ensym(x_item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6) +
+    geom_hline(aes(yintercept = mean(!!ensym(item))), 
+               linetype = "dashed", color = 'darkgray', size = 0.6)
     # scale_colour_gradient2(low = "white", mid = "green" , high = "red")
 
   index <- index + 2
 }
 
-grid.arrange(grobs = plots, ncol = 2, bottom = "dashed lines represent the mean of its corresponding axis")
+grid.arrange(grobs = plots, ncol = 2, 
+             bottom = "dashed lines represent the mean of its corresponding axis")
 
 ```
 
@@ -881,8 +971,10 @@ ww_lm <- read.csv('wineQualityWhites.csv')
 m1 <- lm(quality ~ alcohol, data = ww_lm)
 m2 <- update(m1, ~ . - alcohol + density)
 m3 <- update(m2, ~ . + alcohol)
-m4 <- update(m3, ~ . + fixed.acidity + volatile.acidity + citric.acid + residual.sugar + 
-               chlorides + free.sulfur.dioxide + total.sulfur.dioxide + pH + sulphates)
+m4 <- update(m3, ~ . + fixed.acidity + volatile.acidity + 
+               citric.acid + residual.sugar + 
+               chlorides + free.sulfur.dioxide + 
+               total.sulfur.dioxide + pH + sulphates)
 
 mtable(m1, m2, m3, m4, sdigits = 3)
 
@@ -946,21 +1038,25 @@ Graph above infers the following significant correlation relations
 ```{r echo=FALSE, fig.height=6, fig.width=12, message=FALSE, warning=FALSE, Plot_Two}
 p1 <- ggdensity(ww, 
           x = "alcohol", color = "quality.grp", fill="quality.grp", 
-          add = "mean", rug = FALSE,  palette = "Set1")
+          add = "mean", rug = FALSE,  palette = "Set1", 
+          xlab = "Alcohol (% by Volume)")
 
 p2 <- ggdensity(ww, 
           x = "density", color = "quality.grp", fill="quality.grp", 
-          add = "mean", rug = FALSE,  palette = "Set1") %>%
+          add = "mean", rug = FALSE,  palette = "Set1", 
+          xlab = TeX('Density $(g/cm^3)$')) %>%
   ggpar(., xlim = c(min(ww$density), quantile(ww$density, probs = 0.99)))
 
-ggarrange(p1, p2, ncol=2, nrow = 1, common.legend = TRUE, legend="bottom", labels = "AUTO")
+ggarrange(p1, p2, ncol=2, nrow = 1, 
+          common.legend = TRUE, legend="bottom", labels = "AUTO")
 ```
 
 Above plot infer that great quality wines have the highest median Alcohol level and the lowest median density.
 
 ### Quality interdependency on second order variables vs. Alchohol
 ```{r echo=FALSE, fig.height=8, fig.width=12, message=FALSE, warning=FALSE, Plot_Three}
-grid.arrange(grobs = plot_three, ncol = 2, bottom = "dashed lines represent the mean of its corresponding axis")
+grid.arrange(grobs = plot_three, ncol = 2,
+             bottom = "dashed lines represent the mean of its corresponding axis")
 
 ```
 
